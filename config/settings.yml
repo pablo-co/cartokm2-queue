@@ -1,0 +1,152 @@
+defaults: &defaults
+  flow:
+    initial: xlsx_to_csv
+    xlsx_to_csv:
+      extension: py
+      input:
+        - i
+        - o
+      output:
+        o:
+          extension: csv
+          programs:
+            - traces_filter
+    traces_filter:
+      extension: py
+      input:
+        - i
+        - o
+        - d
+        - p
+        - f
+        - l
+      output:
+        o:
+          extension: csv
+          programs:
+            - stop_stats
+            - gps_stats
+        d:
+          extension: csv
+          programs:
+            - stop_stats
+    gps_stats:
+      extension: py
+      input:
+        - i
+        - o
+        - a
+        - c
+        - d
+        - u
+        - p
+        - f
+        - l
+      output:
+    stop_stats:
+      extension: py
+      input:
+        - i
+        - o
+        - d
+        - e
+        - n
+      output:
+        o:
+          extension: xlsx
+          programs:
+            - process_stops
+        e:
+          extension: csv
+          programs:
+            - process_stops
+        n:
+          extension: csv
+          programs:
+            - process_stops
+    process_stops:
+      extension: py
+      input:
+        - i
+        - e
+        - n
+        - o
+      output:
+        o:
+          extension: csv
+          programs:
+            - stop_centroids
+    stop_centroids:
+      extension: py
+      input:
+        - i
+        - o
+        - q
+      output:
+        o:
+          extension: csv
+          programs:
+            - distance_matrices
+        q:
+          extension: csv
+          programs:
+           - time_frequencies
+    distance_matrices:
+      extension: py
+      input:
+        - i
+        - p
+        - o
+        - t
+      output:
+        d:
+          extension: csv
+          programs:
+        s:
+          extension: csv
+          programs:
+        c:
+          extension: csv
+          programs:
+        v:
+          extension: csv
+          programs:
+        x:
+          extension: csv
+          programs:
+        y:
+          extension: csv
+          programs:
+        z:
+          extension: csv
+          programs:
+    time_frequencies:
+      extension: py
+      input:
+        - q
+        - o
+      output:
+        o:
+          extension: csv
+          programs:
+
+  arguments:
+    o: i
+    d: d
+    p: p
+    q: q
+    e: e
+    n: n
+    v: v
+    x: x
+    y: y
+    z: z
+
+development:
+  <<: *defaults
+
+test:
+  <<: *defaults
+
+production:
+  <<: *defaults
