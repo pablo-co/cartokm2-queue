@@ -115,6 +115,8 @@ defaults: &defaults
     traces: traces
     filtered_traces: filtered_traces
     dates: dates
+    existing: existing
+    non_existing: non_existing
     frequencies: frequencies
     std_and_mean: std_and_mean
     centroids: centroids
