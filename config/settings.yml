@@ -129,24 +129,3 @@ defaults: &defaults
         o:
           extension: csv
           programs:
-
-  arguments:
-    o: i
-    d: d
-    p: p
-    q: q
-    e: e
-    n: n
-    v: v
-    x: x
-    y: y
-    z: z
-
-development:
-  <<: *defaults
-
-test:
-  <<: *defaults
-
-production:
-  <<: *defaults

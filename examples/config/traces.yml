@@ -1,0 +1,59 @@
+defaults: &defaults
+  flow:
+    initial: xlsx_to_csv
+    xlsx_to_csv:
+      extension: py
+      input:
+        - input
+        - output
+      output:
+        output:
+          extension: csv
+          programs:
+            - gps_stats
+    gps_stats:
+      extension: py
+      input:
+        - input
+        - output
+        - polygon
+        - co2
+        - capacity
+        - first_column
+        - last_column
+        - fuel
+        - stats
+        - traces
+      output:
+        traces:
+          extension: csv
+          programs:
+            - upload
+        stats:
+          extension: csv
+          programs:
+            - upload
+    upload:
+      input:
+        - traces
+        - stats
+      output:
+  arguments:
+    output: input
+    polygon: polygon
+    co2: co2
+    capacity: capacity
+    first_column: first_column
+    last_column: last_column
+    fuel: fuel
+    stats: stats
+    traces: traces
+
+development:
+  <<: *defaults
+
+test:
+  <<: *defaults
+
+production:
+  <<: *defaults

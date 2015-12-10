@@ -1,0 +1,129 @@
+defaults: &defaults
+  flow:
+    initial: xlsx_to_csv
+    xlsx_to_csv:
+      extension: py
+      input:
+        - input
+        - output
+      output:
+        output:
+          extension: csv
+          programs:
+            - traces_filter
+    traces_filter:
+      extension: py
+      input:
+        - input
+        - output
+        - dates
+        - polygon
+        - first_column
+        - last_column
+      output:
+        output:
+          extension: csv
+          programs:
+            - stop_stats
+        dates:
+          extension: csv
+          programs:
+            - stop_stats
+    stop_stats:
+      extension: py
+      input:
+        - input
+        - dates
+        - existing
+        - non_existing
+        - output
+      output:
+        output:
+          extension: xlsx
+          programs:
+            - process_stops
+        existing:
+          extension: csv
+          programs:
+            - process_stops
+        non_existing:
+          extension: csv
+          programs:
+            - process_stops
+    process_stops:
+      extension: py
+      input:
+        - input
+        - existing
+        - non_existing
+        - output
+      output:
+        output:
+          extension: csv
+          programs:
+            - stop_centroids
+    stop_centroids:
+      extension: py
+      input:
+        - input
+        - std_and_mean
+        - frequencies
+        - centroids
+      output:
+        frequencies:
+          extension: csv
+          programs:
+             - time_frequencies
+        centroids:
+          extension: csv
+          programs:
+             - time_frequencies
+        std_and_mean:
+          extension: csv
+          programs:
+             - time_frequencies
+    time_frequencies:
+      extension: py
+      input:
+        - std_and_mean
+        - frequencies
+        - centroids
+        - demand
+        - distance_to_customers
+        - output
+      output:
+        output:
+          extension: csv
+          programs:
+            - upload
+    upload:
+      input:
+        - input
+      output:
+        frequencies:
+          extension: csv
+          programs:
+  arguments:
+    output: input
+    polygon: polygon
+    co2: co2
+    capacity: capacity
+    first_column: first_column
+    last_column: last_column
+    fuel: fuel
+    stats: stats
+    traces: traces
+    filtered_traces: filtered_traces
+    dates: dates
+    frequencies: frequencies
+    std_and_mean: std_and_mean
+    centroids: centroids
+
+development:
+  <<: *defaults
+
+test:
+  <<: *defaults
+
+production:
+  <<: *defaults

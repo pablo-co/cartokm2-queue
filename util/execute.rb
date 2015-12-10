@@ -1,17 +1,20 @@
 require 'settingslogic'
 require 'securerandom'
 require_relative 'builder'
+require_relative '../workers/command_worker'
+require_relative '../workers/upload_worker'
 
 class Execute
-
   attr_accessor :outputs
+  attr_accessor :settings
 
   def initialize
     self.outputs = []
   end
 
-  def to_state(next_state, extension, general_arguments, arguments)
+  def to_state(next_state, extension, general_arguments, arguments, settings)
     puts "state: #{next_state}"
+    self.settings = settings
     current_arguments = general_arguments.dup
     current_arguments.merge!(arguments)
     current_arguments.merge!(generate_output_arguments(next_state))
@@ -55,21 +58,27 @@ class Execute
           args[output.key] = output.file_name
         end
       end
-      extension = Settings.flow[state]['extension']
-      CommandWorker.perform_async(state, extension, general_arguments, args)
+      if state == 'upload'
+        args.each do |key, value|
+          Resque.enqueue(UploadWorker, value)
+        end
+      else
+        extension = settings['flow'][state]['extension']
+        Resque.enqueue(CommandWorker, state, extension, general_arguments, args, settings)
+      end
     end
 
   end
 
   def filter_flags(state, flags)
-    inputs = Settings.flow[state]['input']
+    inputs = settings['flow'][state]['input']
     flags = flags.delete_if { |key, value| !inputs.include?(key) } if inputs
     flags
   end
 
   def generate_output_arguments(next_state)
     arguments = {}
-    output_args = Settings.flow[next_state]['output']
+    output_args = settings['flow'][next_state]['output']
     if output_args
       output_args.each do |output|
         flag = output[0]
@@ -80,7 +89,7 @@ class Execute
             arguments[flag] = create_output(output_state, flag, extension)
           end
         else
-          file_name = get_file_name('csv')
+          file_name = get_file_name(extension)
           arguments[flag] = file_name
         end
       end
@@ -124,7 +133,7 @@ class Execute
 
   def transform_options
     outputs.each do |output|
-      output.key = Settings.arguments[output.key]
+      output.key = settings['arguments'][output.key]
     end
   end
 

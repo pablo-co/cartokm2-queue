@@ -18,7 +18,7 @@ class Builder
   def arguments
     arguments_str = ''
     @arguments.each do |key, value|
-      arguments_str += "-#{key} #{value} "
+      arguments_str += "--#{key}=#{value} "
     end
     arguments_str
   end
