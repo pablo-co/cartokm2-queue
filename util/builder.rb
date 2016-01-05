@@ -9,7 +9,6 @@ class Builder
   end
 
   def command
-    puts "#{base} #{arguments}"
     "#{base} #{arguments}"
   end
 

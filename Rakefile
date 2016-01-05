@@ -2,5 +2,5 @@ $LOAD_PATH.unshift File.dirname(__FILE__) unless $LOAD_PATH.include?(File.dirnam
 require 'resque/tasks'
 
 task :'resque:setup' do
-  Dir['./workers/*'].each {|file| require file}
+  Dir['./workers/*'].each { |file| require file }
 end

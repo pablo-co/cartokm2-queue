@@ -3,6 +3,7 @@ require 'securerandom'
 require_relative 'builder'
 require_relative '../workers/command_worker'
 require_relative '../workers/upload_worker'
+require_relative 'output'
 
 class Execute
   attr_accessor :outputs
@@ -60,14 +61,18 @@ class Execute
       end
       if state == 'upload'
         args.each do |key, value|
-          Resque.enqueue(UploadWorker, value)
+          new_file_name = get_new_file_name(get_file_name(value),
+                                            key,
+                                            general_arguments)
+          full_file_name = "#{get_file_path(value)}/#{new_file_name}"
+          change_file_name(value, full_file_name)
+          Resque.enqueue(UploadWorker, full_file_name)
         end
       else
         extension = settings['flow'][state]['extension']
         Resque.enqueue(CommandWorker, state, extension, general_arguments, args, settings)
       end
     end
-
   end
 
   def filter_flags(state, flags)
@@ -89,26 +94,26 @@ class Execute
             arguments[flag] = create_output(output_state, flag, extension)
           end
         else
-          file_name = get_file_name(extension)
+          file_name = generate_file_name(extension)
           arguments[flag] = file_name
         end
       end
     else
-      file_name = get_file_name('csv')
-      arguments['o'] = file_name
+      file_name = generate_file_name('csv')
+      arguments['output'] = file_name
     end
     arguments
   end
 
   def create_output(output_state, flag, extension)
     begin
-      file_name = get_file_name(extension)
+      file_name = generate_file_name(extension)
       add_to_outputs(output_state, flag, file_name)
     rescue => _
     end
   end
 
-  def get_file_name(extension)
+  def generate_file_name(extension)
     "#{DefaultSettings.files_path}/#{SecureRandom.hex}.#{extension}"
   end
 
@@ -133,19 +138,32 @@ class Execute
 
   def transform_options
     outputs.each do |output|
-      output.key = settings['arguments'][output.key]
+      key = settings['arguments'][output.key]
+      output.key = key.nil? ? output.key : key
     end
   end
 
-end
-
-class Output
-
-  def initialize
-    self.states = []
+  def get_new_file_name(file_name, argument, arguments)
+    args = settings['upload_arguments'] || {}
+    return file_name unless args.keys.include?(argument)
+    argument_name = args[argument]
+    "#{arguments[argument_name]}.#{get_file_extension(file_name)}"
   end
 
-  attr_accessor :key
-  attr_accessor :file_name
-  attr_accessor :states
+  def get_file_path(file)
+    file.split('/')[0...-1].join('/')
+  end
+
+  def get_file_name(file)
+    file.split('/').last
+  end
+
+  def get_file_extension(file)
+    file.split('.').last
+  end
+
+  def change_file_name(file_name, new_file_name)
+    File.rename(file_name, new_file_name)
+  end
+
 end

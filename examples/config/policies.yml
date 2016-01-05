@@ -70,32 +70,64 @@ defaults: &defaults
         - frequencies
         - centroids
       output:
-        frequencies:
-          extension: csv
-          programs:
-             - time_frequencies
         centroids:
           extension: csv
           programs:
-             - time_frequencies
-        std_and_mean:
-          extension: csv
-          programs:
-             - time_frequencies
-    time_frequencies:
+             - distance_matrices
+    distance_matrices:
       extension: py
       input:
-        - std_and_mean
-        - frequencies
         - centroids
-        - demand
-        - distance_to_customers
         - output
+        - polygon
+        - clients
+        - distance_stops_to_stops
+        - time_stops_to_stops
+        - distance_stops_to_customers
+        - time_stops_to_customers
       output:
         output:
           extension: csv
           programs:
-            - upload
+        distance_stops_to_stops:
+          extension: csv
+          programs:
+        time_stops_to_stops:
+          extension: csv
+          programs:
+        distance_stops_to_customers:
+          extension: csv
+          programs:
+        time_stops_to_customers:
+          extension: csv
+          programs:
+    flm:
+      extension: py
+      input:
+        - centroids
+        - output
+        - polygon
+        - clients
+        - distance_stops_to_stops
+        - time_stops_to_stops
+        - distance_stops_to_customers
+        - time_stops_to_customers
+      output:
+        output:
+          extension: csv
+          programs:
+        distance_stops_to_stops:
+          extension: csv
+          programs:
+        time_stops_to_stops:
+          extension: csv
+          programs:
+        distance_stops_to_customers:
+          extension: csv
+          programs:
+        time_stops_to_customers:
+          extension: csv
+          programs:
     upload:
       input:
         - input
@@ -105,8 +137,9 @@ defaults: &defaults
           programs:
   arguments:
     output: input
-  upload_arguments:
-    stops: stops_name
+  sticky_arguments:
+    - std_and_mean
+    - centroids
 
 development:
   <<: *defaults

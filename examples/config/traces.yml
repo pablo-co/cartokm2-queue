@@ -40,14 +40,9 @@ defaults: &defaults
       output:
   arguments:
     output: input
-    polygon: polygon
-    co2: co2
-    capacity: capacity
-    first_column: first_column
-    last_column: last_column
-    fuel: fuel
-    stats: stats
-    traces: traces
+  upload_arguments:
+    traces: traces_name
+    stats: stats_name
 
 development:
   <<: *defaults
