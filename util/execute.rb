@@ -60,11 +60,15 @@ class Execute
         end
       end
       if state == 'upload'
+        puts "args"
+        puts args
         args.each do |key, value|
+          puts "filename #{get_file_name(value)}"
           new_file_name = get_new_file_name(get_file_name(value),
                                             key,
                                             general_arguments)
           full_file_name = "#{get_file_path(value)}/#{new_file_name}"
+          puts "new_file_name #{new_file_name}, full_file_name #{full_file_name}"
           change_file_name(value, full_file_name)
           Resque.enqueue(UploadWorker, full_file_name)
         end
@@ -147,7 +151,9 @@ class Execute
     args = settings['upload_arguments'] || {}
     return file_name unless args.keys.include?(argument)
     argument_name = args[argument]
-    "#{arguments[argument_name]}.#{get_file_extension(file_name)}"
+    new_file_name = file_name
+    new_file_name = arguments[argument_name] unless nil_or_empty(arguments[argument_name])
+    "#{new_file_name}.#{get_file_extension(file_name)}"
   end
 
   def get_file_path(file)
@@ -164,6 +170,10 @@ class Execute
 
   def change_file_name(file_name, new_file_name)
     File.rename(file_name, new_file_name)
+  end
+
+  def nil_or_empty(object)
+    object.nil? || object.empty?
   end
 
 end
